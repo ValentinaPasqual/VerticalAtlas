@@ -1,0 +1,45 @@
+{
+  "map": {
+    "initialView": [51.505, -0.09],
+    "initialZoom": 5,
+    "tileLayer": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "attribution": "© OpenStreetMap contributors"
+  },
+  "searchConfig": {
+    "debounceTime": 300,
+    "defaultSort": "title_asc",
+    "sortOptions": [
+      {"value": "title_asc", "label": "Title (A-Z)"},
+      {"value": "rating_desc", "label": "Rating (High to Low)"}
+    ]
+  },
+  "resultsDisplay": {
+    "tagsToShow": ["mainSpace", "narrativeForm"]
+  },
+  "sortings": {
+    "title_asc": {
+      "field": "title",
+      "order": "asc"
+    },
+    "rating_desc": {
+      "field": "year",
+      "order": "desc"
+    }
+  },
+  "aggregations": {
+    "year": {
+      "title": "year",
+      "size": 10,
+      "conjunction": false,
+      "type": "simple"
+    },
+    "mainSpace": {
+      "title": "mainSpace",
+      "conjunction": true,
+      "type": "hierarchical",
+      "hierarchy": ["mainSpace", "region", "country"],
+      "size": 10
+    }
+  },
+  "searchableFields": ["title", "author", "year", "description", "mainSpace"]
+}
