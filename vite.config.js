@@ -1,33 +1,33 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-    base: '/leda/',
-    root: './',
-    build: {
-      outDir: 'dist',
-      rollupOptions: {
-        input: {
-          main: './index.html'
-        },
-        output: {
-          // Preserve file structure
-          preserveEntrySignatures: 'allow-extension'
-        }
+  base: '/leda/',
+  root: './',
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: './index.html'
       },
-      // Explicitly copy static files
-      assetsDir: 'assets',
-      copyPublicDir: true
-    },
-    // Add resolve configuration for itemsjs
-    resolve: {
-      alias: {
-        'itemsjs': 'node_modules/itemsjs/dist/itemsjs.min.js'
+      output: {
+        manualChunks(id) {
+          if (id.includes('itemsjs')) {
+            return 'itemsjs';
+          }
+        }
       }
     },
-    // Ensure static files are served correctly
-    server: {
-      fs: {
-        allow: ['.']
-      }
+    assetsDir: 'assets',
+    copyPublicDir: true
+  },
+  resolve: {
+    alias: {
+      'itemsjs': 'node_modules/itemsjs/dist/index.modern.js'
     }
+  },
+  server: {
+    fs: {
+      allow: ['.']
+    }
+  }
 })
