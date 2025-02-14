@@ -1,5 +1,5 @@
 import './style.css';
-import itemsjs from 'itemsjs';
+import * as itemsjs from 'itemsjs'
 
 class LEDASearch {
   constructor() {
