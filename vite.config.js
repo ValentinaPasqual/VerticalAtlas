@@ -1,4 +1,7 @@
-export default {
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+    base: '/leda/',
     root: './',
     build: {
       outDir: 'dist',
@@ -21,4 +24,4 @@ export default {
         allow: ['.']
       }
     }
-  }
+  })
