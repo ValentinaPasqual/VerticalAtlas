@@ -62,68 +62,77 @@ class LEDASearch {
     }
   }
 
+  // initMap() {
+  //   const { initialView, initialZoom } = this.config.map;
+  
+  //   this.map = L.map('map').setView(initialView, initialZoom);
+    
+  //   // Create base layers object
+  //   this.baseLayers = {
+  //     alidade: L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+  //       maxZoom: 20,
+  //       attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  //     }),
+  //     outdoors: L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
+  //       maxZoom: 20,
+  //       attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  //     }),
+  //     osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  //       maxZoom: 19,
+  //       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  //     }),
+  //     terrain: L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', {
+  //       maxZoom: 18,
+  //       attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  //     })
+  //   };
+  
+  //   // Add the default layer (Alidade Smooth)
+  //   this.baseLayers.alidade.addTo(this.map);
+  //   this.currentBaseLayer = this.baseLayers.alidade;
+  
+  //   // Create layer control dropdown
+  //   const layerControl = document.createElement('select');
+  //   layerControl.className = 'absolute top-4 right-4 z-[1000] px-4 py-2 bg-white rounded-md shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500';
+    
+  //   const layerOptions = {
+  //     alidade: 'Stadia Alidade Smooth',
+  //     outdoors: 'Stadia Outdoors',
+  //     osm: 'OpenStreetMap',
+  //     terrain: 'Stadia Terrain'
+  //   };
+  
+  //   Object.entries(layerOptions).forEach(([value, label]) => {
+  //     const option = document.createElement('option');
+  //     option.value = value;
+  //     option.textContent = label;
+  //     layerControl.appendChild(option);
+  //   });
+  
+  //   // Add event listener for layer changes
+  //   layerControl.addEventListener('change', (e) => {
+  //     const newLayerKey = e.target.value;
+  //     if (this.currentBaseLayer) {
+  //       this.map.removeLayer(this.currentBaseLayer);
+  //     }
+  //     this.currentBaseLayer = this.baseLayers[newLayerKey];
+  //     this.currentBaseLayer.addTo(this.map);
+  //   });
+  
+  //   // Add the control to the map
+  //   const mapContainer = document.getElementById('map');
+  //   mapContainer.style.position = 'relative';
+  //   mapContainer.appendChild(layerControl);
+  
+  //   this.markers = L.layerGroup().addTo(this.map);
+  // }
+
   initMap() {
-    const { initialView, initialZoom } = this.config.map;
-  
+    const { initialView, initialZoom, tileLayer, attribution } = this.config.map;
+
     this.map = L.map('map').setView(initialView, initialZoom);
-    
-    // Create base layers object
-    this.baseLayers = {
-      alidade: L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-        maxZoom: 20,
-        attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }),
-      outdoors: L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
-        maxZoom: 20,
-        attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }),
-      osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }),
-      terrain: L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      })
-    };
-  
-    // Add the default layer (Alidade Smooth)
-    this.baseLayers.alidade.addTo(this.map);
-    this.currentBaseLayer = this.baseLayers.alidade;
-  
-    // Create layer control dropdown
-    const layerControl = document.createElement('select');
-    layerControl.className = 'absolute top-4 right-4 z-[1000] px-4 py-2 bg-white rounded-md shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500';
-    
-    const layerOptions = {
-      alidade: 'Stadia Alidade Smooth',
-      outdoors: 'Stadia Outdoors',
-      osm: 'OpenStreetMap',
-      terrain: 'Stadia Terrain'
-    };
-  
-    Object.entries(layerOptions).forEach(([value, label]) => {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = label;
-      layerControl.appendChild(option);
-    });
-  
-    // Add event listener for layer changes
-    layerControl.addEventListener('change', (e) => {
-      const newLayerKey = e.target.value;
-      if (this.currentBaseLayer) {
-        this.map.removeLayer(this.currentBaseLayer);
-      }
-      this.currentBaseLayer = this.baseLayers[newLayerKey];
-      this.currentBaseLayer.addTo(this.map);
-    });
-  
-    // Add the control to the map
-    const mapContainer = document.getElementById('map');
-    mapContainer.style.position = 'relative';
-    mapContainer.appendChild(layerControl);
-  
+    L.tileLayer(tileLayer, { attribution }).addTo(this.map);
+
     this.markers = L.layerGroup().addTo(this.map);
   }
 

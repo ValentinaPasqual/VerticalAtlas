@@ -1,8 +1,25 @@
 {
-  "hash": "71bc4a5f",
+  "hash": "0835ca9e",
   "configHash": "c47b9b42",
-  "lockfileHash": "e3b0c442",
-  "browserHash": "7361fa63",
-  "optimized": {},
-  "chunks": {}
+  "lockfileHash": "cff0d421",
+  "browserHash": "897c9b9d",
+  "optimized": {
+    "itemsjs": {
+      "src": "../../node_modules/itemsjs/dist/index.modern.js",
+      "file": "itemsjs.js",
+      "fileHash": "f63f1c42",
+      "needsInterop": false
+    },
+    "leaflet": {
+      "src": "../../node_modules/leaflet/dist/leaflet-src.js",
+      "file": "leaflet.js",
+      "fileHash": "ef377e7a",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-BUSYA2B4": {
+      "file": "chunk-BUSYA2B4.js"
+    }
+  }
 }
