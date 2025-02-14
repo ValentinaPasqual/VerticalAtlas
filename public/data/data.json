@@ -16,7 +16,8 @@
     "latitude": 45.6376,
     "longitude": 9.2217,
     "secondarySpaces": ["Hinterland milanese"],
-    "landscapeType": "Paesaggio urbano"
+    "landscapeType": "Paesaggio urbano",
+    "eco_critic_description":"Libro-testimonianza sui fatti di Seveso, grande attenzione alla questione dell’inquinamento ambientale e al movimento ecologista italiano"
   },
   { 
     "id":2,
@@ -35,7 +36,8 @@
     "latitude": 45.6376,
     "longitude": 9.2217,
     "secondarySpaces": ["Hinterland milanese"],
-    "landscapeType": "Paesaggio urbano"
+    "landscapeType": "Paesaggio urbano",
+    "eco_critic_description":"Il disastro ecologico di Seveso in forma narrata, attraverso lo sguardo di due adolescenti; attenzione all’ambientalismo operaio"
   },
   {
     "id":3,
@@ -54,7 +56,8 @@
     "latitude": 43.7696,
     "longitude": 11.2558,
     "secondarySpaces": ["Italia"],
-    "landscapeTypes": ["Paesaggio domestico", "Paesaggio rurale", "Paesaggio urbano", "Paesaggio in rovina"]
+    "landscapeTypes": ["Paesaggio domestico", "Paesaggio rurale", "Paesaggio urbano", "Paesaggio in rovina"],
+    "eco_critic_description":"Nel 2293 quattro personaggi - 3 animali e un nano - compiono un viaggio in cerca di salvezza dopo un’esplosione atomica. Messa in discussione del rapporto tra uomo e animale."
   },
   { 
     "id":4,
@@ -72,7 +75,8 @@
     "latitude": 42.7983,
     "longitude": 11.1073,
     "secondarySpaces": ["Italia"],
-    "landscapeType": "Paesaggio urbano devastato"
+    "landscapeType": "Paesaggio urbano devastato",
+    "eco_critic_description":"Fine del dominio degli esseri umani sulla Terra, estinzione della specie, sostituita da quella animale."
   },
   {
     "id":5,
@@ -89,6 +93,7 @@
     "mainSpaceGeonames": "3182743",
     "latitude": 45.8667,
     "longitude": 11.5167,
-    "landscapeType": ["Montagnoso o pianeggiante"]
+    "landscapeType": ["Montagnoso o pianeggiante"],
+    "eco_critic_description":"Racconto del rapporto tra il genere umano e la natura, in particolare gli animali selvatici. Rapporto dell’uomo con i lavori antichi (premoderni) e confronto con la turistificazione e l’inquinamento della zona."
   }
 ]

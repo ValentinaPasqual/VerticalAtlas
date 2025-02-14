@@ -130,45 +130,64 @@ class LEDASearch {
   //   this.markers = L.layerGroup().addTo(this.map);
   // }
 
-  initMap() {
+initMap() {
     const { initialView, initialZoom, tileLayer, attribution } = this.config.map;
 
     this.map = L.map('map').setView(initialView, initialZoom);
     L.tileLayer(tileLayer, { attribution }).addTo(this.map);
 
-    // Initialize marker cluster group instead of regular layer group
+    // Create a custom icon using Lucide MapPin
+    this.createCustomIcon = (count) => {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#1e40af" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+          ${count > 1 ? `<text x="12" y="10" text-anchor="middle" dy=".3em" fill="white" font-size="8" font-family="Arial">${count}</text>` : ''}
+        </svg>
+      `;
+
+      return L.divIcon({
+        html: svg,
+        className: 'custom-marker',
+        iconSize: [24, 24],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -24]
+      });
+    };
+
+    // Initialize marker cluster group
     this.markers = L.markerClusterGroup({
       showCoverageOnHover: true,
       zoomToBoundsOnClick: true,
       spiderfyOnMaxZoom: true,
       removeOutsideVisibleBounds: true,
-      iconCreateFunction: function(cluster) {
+      iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="18" fill="#1e40af" stroke="#ffffff" stroke-width="2"/>
+            <text x="20" y="20" text-anchor="middle" dy=".3em" fill="white" font-size="14" font-family="Arial">${count}</text>
+          </svg>
+        `;
+
         return L.divIcon({
-          html: `<div class="marker-cluster-custom">${count}</div>`,
-          className: 'marker-cluster',
-          iconSize: L.point(40, 40)
+          html: svg,
+          className: 'custom-cluster',
+          iconSize: [40, 40],
+          iconAnchor: [20, 20]
         });
       }
     }).addTo(this.map);
 
-    // Add custom CSS for the cluster markers
+    // Add custom CSS
     const style = document.createElement('style');
     style.textContent = `
-      .marker-cluster-custom {
-        background: #1e40af;
-        color: white;
-        border-radius: 50%;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 14px;
+      .custom-marker {
+        background: none;
+        border: none;
       }
-      .marker-cluster {
-        background: transparent;
+      .custom-cluster {
+        background: none;
         border: none;
       }
     `;
@@ -199,55 +218,28 @@ class LEDASearch {
       const { items, coords } = group;
       const count = items.length;
 
-      // Create popup content with list of all items at this location
+      // Create popup content
       const popupContent = `
-        <div class="max-h-60 overflow-y-auto">
+        <div class="max-h-60 overflow-y-auto p-2">
           <h3 class="font-bold mb-2">Location Items (${count})</h3>
           <ul class="space-y-2">
             ${items.map(item => `
               <li class="border-b pb-2">
-                <div class="font-semibold">${item.mainSpace}</div>
-                <div class="text-sm">${item.landscapeType}</div>
+                <div class="font-semibold">${item.mainSpace || ''}</div>
+                <div class="text-sm">${item.landscapeType || ''}</div>
               </li>
             `).join('')}
           </ul>
         </div>
       `;
 
-      // Create marker with custom icon if there are multiple items
+      // Create marker with custom icon
       const marker = L.marker(coords, {
-        icon: count > 1 ? L.divIcon({
-          html: `<div class="single-marker-count">${count}</div>`,
-          className: 'custom-marker',
-          iconSize: [30, 30]
-        }) : undefined
+        icon: this.createCustomIcon(count)
       }).bindPopup(popupContent);
 
-      // Add marker to cluster group
       this.markers.addLayer(marker);
     });
-
-    // Add custom CSS for single markers with counts
-    const style = document.createElement('style');
-    style.textContent = `
-      .custom-marker {
-        background: transparent;
-        border: none;
-      }
-      .single-marker-count {
-        background: #1e40af;
-        color: white;
-        border-radius: 50%;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 12px;
-      }
-    `;
-    document.head.appendChild(style);
   }
 
   bindEvents() {
@@ -815,7 +807,8 @@ class LEDASearch {
         <div class="p-4 bg-white rounded-lg shadow">
           <h3 class="font-semibold">${item.title}</h3>
           <p>by ${item.author}</p>
-          <p>Date: ${item.year}</p>
+          <p>Data: ${item.year}</p>
+          <p><i>${item.eco_critic_description}</i></p>
         </div>
       `)
       .join('');
