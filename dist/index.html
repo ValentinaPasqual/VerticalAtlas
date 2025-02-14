@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEDA Search</title>
+    <link rel="icon" href="data:;base64,=" />
+    <style>
+        #map { height: 400px; }
+    </style>
+  <script type="module" crossorigin src="/assets/main-CodQknh5.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-Bh6AC9Ic.css">
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">LEDA Search</h1>
+
+        <div class="grid grid-cols-4 gap-6">
+            <!-- Filters Section -->
+            <div class="col-span-1 bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Filters</h2>
+                
+                <!-- Search Input -->
+                <div class="mb-4">
+                    <input type="text" id="search-input" 
+                           class="w-full p-2 border rounded" 
+                           placeholder="Search...">
+                </div>
+
+                <!-- Facets -->
+                <div class="mb-4">
+                  <select 
+                      id="sort-select" 
+                      class="w-full p-2 border rounded-lg"
+                  >
+                      <!-- Sort options will be populated by JavaScript -->
+                  </select>
+              </div>
+          
+              <!-- Dynamic facets container -->
+              <div id="facets-container">
+                  <!-- Each facet will be dynamically generated based on config -->
+                  <template id="facet-template">
+                      <div class="facet-group mb-4">
+                          <h3 class="font-semibold mb-2"></h3>
+                          <div class="facet-options space-y-2">
+                              <!-- Facet options will be populated by JavaScript -->
+                          </div>
+                      </div>
+                  </template>
+              </div>
+            </div>
+
+            <!-- Map and Results Section -->
+            <div class="col-span-3">
+                <div id="map" class="h-96 mb-6 rounded-lg shadow"></div>
+                                
+                <div id="results" class="space-y-4">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
