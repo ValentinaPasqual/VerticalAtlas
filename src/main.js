@@ -3,7 +3,6 @@ import itemsjs from 'itemsjs';
 import 'leaflet/dist/leaflet.css'; 
 import L from 'leaflet';
 
-
 class LEDASearch {
   constructor() {
     this.state = {
@@ -42,7 +41,7 @@ class LEDASearch {
 
   async loadConfiguration() {
     try {
-      const response = await fetch('./src/config/map-config.json');
+      const response = await fetch('/leda/config/map-config.json');
       this.config = await response.json();
       console.log('Loaded configuration:', this.config);
     } catch (error) {
@@ -53,7 +52,7 @@ class LEDASearch {
 
   async initSearchEngine() {
     try {
-      const response = await fetch('./src/data/data.json');
+      const response = await fetch('/leda/data/data.json');
       const data = await response.json();
       this.searchEngine = itemsjs(data, this.config);
       console.log('Search engine initialized with data:', data.length, 'items');

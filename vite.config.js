@@ -20,11 +20,7 @@ export default defineConfig({
     assetsDir: 'assets',
     copyPublicDir: true
   },
-  resolve: {
-    alias: {
-      'itemsjs': 'node_modules/itemsjs/dist/index.modern.js'
-    }
-  },
+  publicDir: 'public',  // Add this line
   server: {
     fs: {
       allow: ['.']

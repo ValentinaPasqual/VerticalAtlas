@@ -1,0 +1,62 @@
+{
+  "map": {
+    "initialView": [51.505, -0.09],
+    "initialZoom": 5,
+    "tileLayer": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "attribution": "© OpenStreetMap contributors"
+  },
+  "searchConfig": {
+    "debounceTime": 300,
+    "defaultSort": "date_desc",
+    "sortOptions": [
+      {"value": "date_desc", "label": "Date (Desc)"},
+      {"value": "date_asc", "label": "Date (Asc)"}
+    ]
+  },
+  "resultsDisplay": {
+    "tagsToShow": ["title", "author", "year"]
+  },
+  "sortings": {
+    "date_desc": {
+      "field": "Data",
+      "order": "desc"
+    },
+    "date_asc": {
+      "field": "Data",
+      "order": "asc"
+    }
+  },
+  "aggregations": {
+    "author": {
+      "title": "Autore",
+      "size": 100,
+      "conjunction": false,
+      "type": "simple"
+    },
+    "publisher": {
+      "title": "Editore",
+      "size": 100,
+      "conjunction": false,
+      "type": "simple"
+    },
+    "year": {
+      "title": "Anno di pubblicazione",
+      "size": 100,
+      "conjunction": false,
+      "type": "chronology"
+    },
+    "mainSpace": {
+      "title": "Ambientazione",
+      "size": 100,
+      "conjunction": false,
+      "type": "taxonomy"
+    },
+    "landscapeType": {
+      "title": "Tipo di ambientazione",
+      "size": 100,
+      "conjunction": false,
+      "type": "simple"
+    }
+  },
+  "searchableFields": ["title", "author"]
+}
