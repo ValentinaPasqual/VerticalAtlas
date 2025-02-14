@@ -18,10 +18,16 @@ export default defineConfig({
       assetsDir: 'assets',
       copyPublicDir: true
     },
+    // Add resolve configuration for itemsjs
+    resolve: {
+      alias: {
+        'itemsjs': 'node_modules/itemsjs/dist/itemsjs.min.js'
+      }
+    },
     // Ensure static files are served correctly
     server: {
       fs: {
         allow: ['.']
       }
     }
-  })
+})
