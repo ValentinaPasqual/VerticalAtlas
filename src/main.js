@@ -2,6 +2,9 @@ import './style.css';
 import itemsjs from 'itemsjs';
 import 'leaflet/dist/leaflet.css'; 
 import L from 'leaflet';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
 
 class LEDASearch {
   constructor() {
@@ -133,7 +136,118 @@ class LEDASearch {
     this.map = L.map('map').setView(initialView, initialZoom);
     L.tileLayer(tileLayer, { attribution }).addTo(this.map);
 
-    this.markers = L.layerGroup().addTo(this.map);
+    // Initialize marker cluster group instead of regular layer group
+    this.markers = L.markerClusterGroup({
+      showCoverageOnHover: true,
+      zoomToBoundsOnClick: true,
+      spiderfyOnMaxZoom: true,
+      removeOutsideVisibleBounds: true,
+      iconCreateFunction: function(cluster) {
+        const count = cluster.getChildCount();
+        return L.divIcon({
+          html: `<div class="marker-cluster-custom">${count}</div>`,
+          className: 'marker-cluster',
+          iconSize: L.point(40, 40)
+        });
+      }
+    }).addTo(this.map);
+
+    // Add custom CSS for the cluster markers
+    const style = document.createElement('style');
+    style.textContent = `
+      .marker-cluster-custom {
+        background: #1e40af;
+        color: white;
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .marker-cluster {
+        background: transparent;
+        border: none;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  renderMarkers(items) {
+    // Clear previous markers
+    this.markers.clearLayers();
+
+    // Group items by coordinates
+    const locationGroups = {};
+    items.forEach(item => {
+      if (item.latitude && item.longitude) {
+        const key = `${item.latitude},${item.longitude}`;
+        if (!locationGroups[key]) {
+          locationGroups[key] = {
+            items: [],
+            coords: [item.latitude, item.longitude]
+          };
+        }
+        locationGroups[key].items.push(item);
+      }
+    });
+
+    // Create markers for each location group
+    Object.values(locationGroups).forEach(group => {
+      const { items, coords } = group;
+      const count = items.length;
+
+      // Create popup content with list of all items at this location
+      const popupContent = `
+        <div class="max-h-60 overflow-y-auto">
+          <h3 class="font-bold mb-2">Location Items (${count})</h3>
+          <ul class="space-y-2">
+            ${items.map(item => `
+              <li class="border-b pb-2">
+                <div class="font-semibold">${item.mainSpace}</div>
+                <div class="text-sm">${item.landscapeType}</div>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      `;
+
+      // Create marker with custom icon if there are multiple items
+      const marker = L.marker(coords, {
+        icon: count > 1 ? L.divIcon({
+          html: `<div class="single-marker-count">${count}</div>`,
+          className: 'custom-marker',
+          iconSize: [30, 30]
+        }) : undefined
+      }).bindPopup(popupContent);
+
+      // Add marker to cluster group
+      this.markers.addLayer(marker);
+    });
+
+    // Add custom CSS for single markers with counts
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-marker {
+        background: transparent;
+        border: none;
+      }
+      .single-marker-count {
+        background: #1e40af;
+        color: white;
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 12px;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   bindEvents() {
