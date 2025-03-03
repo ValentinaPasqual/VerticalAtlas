@@ -6,6 +6,8 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 
+const base = import.meta.env.BASE_URL;
+
 class LEDASearch {
   constructor() {
     this.state = {
@@ -55,7 +57,7 @@ class LEDASearch {
 
   async loadConfiguration() {
     try {
-      const response = await fetch('/leda/config/map-config.json');
+      const response = await fetch(`${base}/config/map-config.json`);
       this.config = await response.json();
       console.log('Loaded configuration:', this.config);
     } catch (error) {
@@ -67,7 +69,7 @@ class LEDASearch {
   async initSearchEngine() {
     try {
       // Fetch the TSV file
-      const response = await fetch('/leda/data/data.tsv');
+      const response = await fetch(`${base}/data/data.tsv`);
       const tsvText = await response.text();
          
       // Parse TSV to JSON
