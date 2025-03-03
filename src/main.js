@@ -15,7 +15,16 @@ class LEDASearch {
       bounds: null,
     };
 
+    // Get loader element
+    this.loaderElement = document.getElementById('loader-container');
     this.initialize();
+  }
+
+   // Hide loader
+  hideLoader() {
+    if (this.loaderElement) {
+      this.loaderElement.classList.add('loader-hidden');
+    }
   }
 
   async initialize() {
@@ -37,8 +46,10 @@ class LEDASearch {
       this.bindEvents();
       await this.fetchAggregations();
       await this.performSearch();
+      this.hideLoader();
     } catch (error) {
       console.error('Initialization error:', error);
+      this.hideLoader();
     }
   }
 
@@ -55,80 +66,80 @@ class LEDASearch {
 
   async initSearchEngine() {
     try {
-      const response = await fetch('/leda/data/data.json');
-      const data = await response.json();
-      this.searchEngine = itemsjs(data, this.config);
-      console.log('Search engine initialized with data:', data.length, 'items');
+      // Fetch the TSV file
+      const response = await fetch('/leda/data/data.tsv');
+      const tsvText = await response.text();
+         
+      // Parse TSV to JSON
+      const preprocessJsonData = this.parseTsvToJson(tsvText);
+
+      // Split multivalue fields based on config
+      const jsonData = this.processMultivalueFields(preprocessJsonData);
+
+      this.config.searchConfig.per_page = jsonData.lenght;
+
+      // Initialize itemsjs with the parsed JSON data
+      this.searchEngine = itemsjs(jsonData, this.config);
+
+      console.log('Search engine initialized with data:', jsonData.length, 'items');
+
     } catch (error) {
       console.error('Error initializing search engine:', error);
       throw error;
     }
   }
 
-  // initMap() {
-  //   const { initialView, initialZoom } = this.config.map;
-  
-  //   this.map = L.map('map').setView(initialView, initialZoom);
+  // Add this method to process multivalue fields
+  processMultivalueFields(preprocessJsonData) {
+    const multivalueConfig = this.config.datasetConfig?.multivalue_rows || {};
     
-  //   // Create base layers object
-  //   this.baseLayers = {
-  //     alidade: L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-  //       maxZoom: 20,
-  //       attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  //     }),
-  //     outdoors: L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
-  //       maxZoom: 20,
-  //       attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  //     }),
-  //     osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  //       maxZoom: 19,
-  //       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  //     }),
-  //     terrain: L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', {
-  //       maxZoom: 18,
-  //       attribution: '&copy; <a href="https://www.stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  //     })
-  //   };
-  
-  //   // Add the default layer (Alidade Smooth)
-  //   this.baseLayers.alidade.addTo(this.map);
-  //   this.currentBaseLayer = this.baseLayers.alidade;
-  
-  //   // Create layer control dropdown
-  //   const layerControl = document.createElement('select');
-  //   layerControl.className = 'absolute top-4 right-4 z-[1000] px-4 py-2 bg-white rounded-md shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500';
+    preprocessJsonData.forEach(item => {
+      Object.keys(multivalueConfig).forEach(field => {
+        if (item[field] && typeof item[field] === 'string') {
+          const separator = multivalueConfig[field];
+          item[field] = item[field].split(separator).map(val => val.trim());
+        }
+      });
+    });
     
-  //   const layerOptions = {
-  //     alidade: 'Stadia Alidade Smooth',
-  //     outdoors: 'Stadia Outdoors',
-  //     osm: 'OpenStreetMap',
-  //     terrain: 'Stadia Terrain'
-  //   };
+    return preprocessJsonData;
+  }
+
+  // Helper method to parse TSV to JSON
+  parseTsvToJson(tsvText) {
+    // Split the TSV text into rows
+  const rows = tsvText.trim().split('\n');
   
-  //   Object.entries(layerOptions).forEach(([value, label]) => {
-  //     const option = document.createElement('option');
-  //     option.value = value;
-  //     option.textContent = label;
-  //     layerControl.appendChild(option);
-  //   });
+  // Extract headers from the first row
+  const headers = rows[0].split('\t');
   
-  //   // Add event listener for layer changes
-  //   layerControl.addEventListener('change', (e) => {
-  //     const newLayerKey = e.target.value;
-  //     if (this.currentBaseLayer) {
-  //       this.map.removeLayer(this.currentBaseLayer);
-  //     }
-  //     this.currentBaseLayer = this.baseLayers[newLayerKey];
-  //     this.currentBaseLayer.addTo(this.map);
-  //   });
-  
-  //   // Add the control to the map
-  //   const mapContainer = document.getElementById('map');
-  //   mapContainer.style.position = 'relative';
-  //   mapContainer.appendChild(layerControl);
-  
-  //   this.markers = L.layerGroup().addTo(this.map);
-  // }
+  // Convert each data row to a JSON object
+  return rows.slice(1).map(row => {
+    const values = row.split('\t');
+    const item = {};
+    
+    // Map each value to its corresponding header
+    headers.forEach((header, index) => {
+      // Handle the case where cell is not empty
+      if (index < values.length && values[index] !== '') {
+        const value = values[index];
+        
+        // Try to parse numbers and booleans
+        if (value.toLowerCase() === 'true') {
+          item[header] = true;
+        } else if (value.toLowerCase() === 'false') {
+          item[header] = false;
+        } else if (!isNaN(value) && value.trim() !== '') {
+          item[header] = Number(value);
+        } else {
+          item[header] = value;
+        }
+      } 
+    });
+    
+    return item;
+  });
+  }
 
 initMap() {
     const { initialView, initialZoom, tileLayer, attribution } = this.config.map;
@@ -154,9 +165,10 @@ initMap() {
         popupAnchor: [0, -24]
       });
     };
-
+    
     // Initialize marker cluster group
     this.markers = L.markerClusterGroup({
+      disableClusteringAtZoom: 15,
       showCoverageOnHover: true,
       zoomToBoundsOnClick: true,
       spiderfyOnMaxZoom: true,
@@ -202,11 +214,13 @@ initMap() {
     const locationGroups = {};
     items.forEach(item => {
       if (item.latitude && item.longitude) {
-        const key = `${item.latitude},${item.longitude}`;
+        const key = `${parseFloat(item.latitude)},${parseFloat(item.longitude)}`;
+        const locName = item.Name
         if (!locationGroups[key]) {
           locationGroups[key] = {
+            name : locName, 
             items: [],
-            coords: [item.latitude, item.longitude]
+            coords: [parseFloat(item.latitude), parseFloat(item.longitude)]
           };
         }
         locationGroups[key].items.push(item);
@@ -215,22 +229,23 @@ initMap() {
 
     // Create markers for each location group
     Object.values(locationGroups).forEach(group => {
-      const { items, coords } = group;
+      const { name, items, coords } = group;
       const count = items.length;
 
       // Create popup content
       const popupContent = `
-        <div class="max-h-60 overflow-y-auto p-2">
-          <h3 class="font-bold mb-2">Location Items (${count})</h3>
-          <ul class="space-y-2">
-            ${items.map(item => `
-              <li class="border-b pb-2">
-                <div class="font-semibold">${item.mainSpace || ''}</div>
-                <div class="text-sm">${item.landscapeType || ''}</div>
-              </li>
-            `).join('')}
-          </ul>
-        </div>
+      <div class="max-h-60 overflow-y-auto p-2">
+        <h3 class="font-bold mb-2">${items.length} eventi</h3> 
+        <ul class="space-y-2">
+          ${items.map(item => `
+            <li class="border-b pb-2">
+              ${item.Name} (${item.Year}) <br>
+             Alpinisti: ${item.Alpinist} <br>
+              Guide: ${item.Guide}
+            </li>
+          `).join('')}
+        </ul>
+      </div>
       `;
 
       // Create marker with custom icon
@@ -335,120 +350,131 @@ initMap() {
         title.textContent = facetConfig.title || facetKey;
         facetGroup.appendChild(title);
 
-    // In the renderFacets method, replace the slider creation code with this:
-    if (facetConfig.type === 'chronology') {
-      const sliderContainer = document.createElement('div');
-      sliderContainer.className = 'facet-slider my-4';
-    
-      const dateBuckets = aggregations[facetKey] || [];
-      const dates = dateBuckets
-        .map(bucket => {
-          const date = new Date(bucket.key);
-          return isNaN(date.getTime()) ? null : date;
-        })
-        .filter(date => date !== null);
-    
-      const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
-      const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
-    
-      if (facetConfig.type === 'chronology') {
-        const sliderContainer = document.createElement('div');
-        sliderContainer.className = 'chronology-slider my-4';
-    
-        // Create the chart and slider structure
-        sliderContainer.innerHTML = `
-          <label class="sr-only">Date range</label>
-          <div class="relative">
-            <div id="${facetKey}-chart-background"></div>
-            <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
-              <div id="${facetKey}-chart-foreground"></div>
-            </div>
-          </div>
-          <div id="${facetKey}-slider" class="mt-4"></div>
-          <div class="mt-5">
-            <div class="text-sm font-medium mb-2">Custom range:</div>
-            <div class="flex space-x-4">
-              <div class="flex-1">
-                <input id="${facetKey}-min-input" type="text"
-                       class="py-2 px-3 block w-full border rounded-md text-sm focus:ring focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
-                       value="${minDate}">
-              </div>
-              <div class="flex-1">
-                <input id="${facetKey}-max-input" type="text"
-                       class="py-2 px-3 block w-full border rounded-md text-sm focus:ring focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
-                       value="${maxDate}">
-              </div>
-            </div>
-          </div>
-        `;
-    
-        facetGroup.appendChild(sliderContainer);
-    
-        // Access elements using querySelector within sliderContainer
-        const slider = sliderContainer.querySelector(`#${facetKey}-slider`);
-        const minInput = sliderContainer.querySelector(`#${facetKey}-min-input`);
-        const maxInput = sliderContainer.querySelector(`#${facetKey}-max-input`);
-    
-        // Get current filter values or use min/max dates
-        const currentFilter = this.state.filters[facetKey];
-        let startValue, endValue;
-    
-        if (!currentFilter || currentFilter.length === 0) {
-            startValue = minDate.getTime();
-            endValue = maxDate.getTime();
-        } else {
-            startValue = currentFilter[0];
-            endValue = currentFilter[1];
-        }
-    
-        // Initialize noUiSlider
-        noUiSlider.create(slider, {
-            start: [startValue, endValue],
-            connect: true,
-            range: {
-                'min': minDate.getTime(),
-                'max': maxDate.getTime()
-            },
-            format: {
-                to: (value) => Math.round(value),
-                from: (value) => parseInt(value, 10)
-            }
-        });
-    
-        // Update inputs when slider changes
-        slider.noUiSlider.on('update', (values) => {
-            minInput.value = new Date(Number(values[0])).toISOString().split('T')[0];
-            maxInput.value = new Date(Number(values[1])).toISOString().split('T')[0];
-        });
-    
-        // Handle slider changes
-        slider.noUiSlider.on('change', (values) => {
-            const [start, end] = values.map(val => Number(val));
-    
-            if (!isNaN(start) && !isNaN(end)) {
-                this.state.filters[facetKey] = [start, end];
-                this.performSearch();
-                this.fetchAggregations();
-            }
-        });
-    
-        // Handle input changes
-        const handleInputChange = this.debounce((evt) => {
-            const isMin = evt.target === minInput;
-            const inputValue = new Date(evt.target.value).getTime();
-            const [currentMin, currentMax] = slider.noUiSlider.get().map(Number);
-    
-            slider.noUiSlider.set([
-                isMin ? inputValue : currentMin,
-                isMin ? currentMax : inputValue
-            ]);
-        }, 200);
-    
-        minInput.addEventListener('input', handleInputChange);
-        maxInput.addEventListener('input', handleInputChange);
-    }
-    
-      }  
+// In the renderFacets method, replace the slider creation code with this:
+if (facetConfig.type === 'range') {
+  const sliderContainer = document.createElement('div');
+  sliderContainer.className = 'facet-slider my-4';
+
+  const valueBuckets = aggregations[facetKey] || [];
+  // Store the full bucket information for the bar chart
+  const buckets = valueBuckets
+    .map(bucket => {
+      const value = parseInt(bucket.key, 10);
+      return isNaN(value) ? null : {
+        value: value,
+        count: bucket.doc_count || 0
+      };
+    })
+    .filter(bucket => bucket !== null);
+  
+  // Extract just the values for min/max calculations
+  const values = buckets.map(bucket => bucket.value);
+
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+
+  // Create the chart and slider structure
+  sliderContainer.innerHTML = `
+    <label class="sr-only">Value range</label>
+    <div class="relative">
+      <div id="${facetKey}-chart" class="w-full h-24 mb-2"></div>
+    </div>
+    <div id="${facetKey}-slider" class="mt-2"></div>
+    <div class="mt-5">
+      <div class="text-sm font-medium mb-2">Custom range:</div>
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <input id="${facetKey}-min-input" type="number"
+                 class="py-2 px-3 block w-full border rounded-md text-sm focus:ring focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
+                 value="${minValue}">
+        </div>
+        <div class="flex-1">
+          <input id="${facetKey}-max-input" type="number"
+                 class="py-2 px-3 block w-full border rounded-md text-sm focus:ring focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
+                 value="${maxValue}">
+        </div>
+      </div>
+    </div>
+  `;
+
+  facetGroup.appendChild(sliderContainer);
+
+  // Access elements using querySelector within sliderContainer
+  const chartElement = sliderContainer.querySelector(`#${facetKey}-chart`);
+  const slider = sliderContainer.querySelector(`#${facetKey}-slider`);
+  const minInput = sliderContainer.querySelector(`#${facetKey}-min-input`);
+  const maxInput = sliderContainer.querySelector(`#${facetKey}-max-input`);
+  
+  // Render the bar chart
+  this.renderBarChart(chartElement, buckets, minValue, maxValue);
+
+  // Get current filter values or use min/max values
+  const currentFilter = this.state.filters[facetKey];
+  let startValue, endValue;
+
+  if (!currentFilter || currentFilter.length === 0) {
+      startValue = minValue;
+      endValue = maxValue;
+  } else {
+      startValue = currentFilter[0];
+      endValue = currentFilter[1];
+  }
+
+  // Initialize noUiSlider
+  noUiSlider.create(slider, {
+      start: [startValue, endValue],
+      connect: true,
+      step: 1, // Integer steps
+      range: {
+          'min': minValue,
+          'max': maxValue
+      },
+      format: {
+          to: (value) => Math.round(value),
+          from: (value) => parseInt(value, 10)
+      }
+  });
+
+  // Update inputs when slider changes
+  slider.noUiSlider.on('update', (values) => {
+      minInput.value = Math.round(Number(values[0]));
+      maxInput.value = Math.round(Number(values[1]));
+  });
+
+  // Handle slider changes
+  slider.noUiSlider.on('change', (values) => {
+      const [start, end] = values.map(val => Math.round(Number(val)));
+
+      if (!isNaN(start) && !isNaN(end)) {
+          this.state.filters[facetKey] = [start, end];
+          this.performSearch();
+          this.fetchAggregations();
+          
+          // Update the highlighted range in the chart
+          this.updateChartHighlight(chartElement, buckets, start, end);
+      }
+  });
+
+  // Handle input changes
+  const handleInputChange = this.debounce((evt) => {
+      const isMin = evt.target === minInput;
+      const inputValue = parseInt(evt.target.value, 10);
+      const [currentMin, currentMax] = slider.noUiSlider.get().map(Number);
+
+      if (!isNaN(inputValue)) {
+          slider.noUiSlider.set([
+              isMin ? inputValue : currentMin,
+              isMin ? currentMax : inputValue
+          ]);
+      }
+  }, 200);
+
+  minInput.addEventListener('input', handleInputChange);
+  maxInput.addEventListener('input', handleInputChange);
+
+  // Initial chart highlight based on current range
+  this.updateChartHighlight(chartElement, buckets, startValue, endValue);
+}
 
       else if (facetConfig.type === 'taxonomy') {
         const taxonomyContainer = document.createElement('div');
@@ -619,6 +645,77 @@ initMap() {
     this.addFacetEventListeners();
   }
 
+  // handles barchart in slider 
+
+  // Add these methods to your class
+
+/**
+ * Renders a bar chart showing the distribution of values
+ * @param {HTMLElement} element - The container element for the chart
+ * @param {Array} buckets - Array of value buckets with counts
+ * @param {number} minValue - Minimum value in the range
+ * @param {number} maxValue - Maximum value in the range
+ */
+renderBarChart(element, buckets, minValue, maxValue) {
+  // Clear any existing content
+  element.innerHTML = '';
+  
+  // Find the maximum count for scaling
+  const maxCount = Math.max(...buckets.map(bucket => bucket.count));
+  
+  // Create a container for the bars
+  const barsContainer = document.createElement('div');
+  barsContainer.className = 'flex items-end w-full h-full relative';
+  element.appendChild(barsContainer);
+  
+  // Sort buckets by value to ensure bars are in order
+  const sortedBuckets = [...buckets].sort((a, b) => a.value - b.value);
+  
+  // Create and append bar elements
+  sortedBuckets.forEach(bucket => {
+    const barHeight = maxCount > 0 ? (bucket.count / maxCount) * 100 : 0;
+    
+    const bar = document.createElement('div');
+    bar.className = 'flex-1 mx-px';
+    bar.style.height = `${barHeight}%`;
+    bar.style.backgroundColor = '#b0c4de';
+    bar.dataset.value = bucket.value;
+    bar.dataset.count = bucket.count;
+    bar.title = `Value: ${bucket.value}, Count: ${bucket.count}`;
+    
+    barsContainer.appendChild(bar);
+  });
+  
+  // Add a selection overlay for highlighting the active range
+  const highlightOverlay = document.createElement('div');
+  highlightOverlay.className = 'absolute top-0 h-full pointer-events-none';
+  highlightOverlay.style.backgroundColor = 'rgba(66, 153, 225, 0.3)';
+  highlightOverlay.id = `${element.id}-highlight`;
+  element.appendChild(highlightOverlay);
+}
+
+/**
+ * Updates the highlighted section of the chart based on selected range
+ * @param {HTMLElement} chartElement - The chart container element
+ * @param {Array} buckets - Array of value buckets
+ * @param {number} startValue - Start of selected range
+ * @param {number} endValue - End of selected range
+ */
+updateChartHighlight(chartElement, buckets, startValue, endValue) {
+  const highlight = chartElement.querySelector(`#${chartElement.id}-highlight`);
+  if (!highlight) return;
+  
+  const range = buckets[buckets.length - 1].value - buckets[0].value;
+  if (range <= 0) return;
+  
+  // Calculate the left position and width as percentages
+  const leftPos = ((startValue - buckets[0].value) / range) * 100;
+  const width = ((endValue - startValue) / range) * 100;
+  
+  highlight.style.left = `${leftPos}%`;
+  highlight.style.width = `${width}%`;
+}
+
   onFacetChange(event) {
     const { value, checked } = event.target;
     const facetType = event.target.dataset.facetType;
@@ -664,49 +761,6 @@ initMap() {
     });
   }
 
-  // filterByBounds(items, bounds) {
-  //   if (!bounds) return items;
-  //   return items.filter(item => {
-  //     const { latitude: lat, longitude: lng } = item;
-  //     return (
-  //       lat >= bounds.south &&
-  //       lat <= bounds.north &&
-  //       lng >= bounds.west &&
-  //       lng <= bounds.east
-  //     );
-  //   });
-  // }
-
-  // updateBounds() {
-  //   const bounds = this.map?.getBounds();
-  //   if (bounds) {
-  //     this.state.bounds = {
-  //       north: bounds.getNorth(),
-  //       south: bounds.getSouth(),
-  //       east: bounds.getEast(),
-  //       west: bounds.getWest(),
-  //     };
-  //   }
-  // }
-
-  renderMarkers(items) {
-    // Clear previous markers
-    this.markers.clearLayers();
-  
-    // Loop through items and create markers
-    items.forEach(item => {
-      const { latitude, longitude, title } = item;
-      if (latitude && longitude) {
-        const marker = L.marker([latitude, longitude])
-          .bindPopup(`
-            <h3>${item.mainSpace}</h3>
-            <p>${item.landscapeType}</p>
-          `)
-          .addTo(this.markers);
-      }
-    });
-  }
-
   performSearch() {
     if (!this.searchEngine) {
       console.error('Search engine not initialized');
@@ -727,7 +781,7 @@ initMap() {
       if (!config) return;
 
       switch (config.type) {
-        case 'chronology':
+        case 'range':
           dateFilters[key] = values;
           break;
         case 'taxonomy':
@@ -742,7 +796,9 @@ initMap() {
       query: this.state.query || '',
       filters: regularFilters,
       sort: this.state.sort || 'title_asc',
+      per_page: 526,
       filter: (item) => {
+
         // Check date filters
         for (const [field, range] of Object.entries(dateFilters)) {
           if (range.length === 2) {
@@ -771,6 +827,8 @@ initMap() {
       }
     });
 
+
+
     // Update the map
     const coordinates = results.data.items
       .filter(item => item.latitude && item.longitude)
@@ -778,7 +836,7 @@ initMap() {
 
     if (coordinates.length > 0) {
       const bounds = L.latLngBounds(coordinates);
-      this.map.fitBounds(bounds);
+      // this.map.fitBounds(bounds);
     }
 
     // Update markers and results
@@ -805,10 +863,8 @@ initMap() {
     resultsContainer.innerHTML = items
       .map((item) => `
         <div class="p-4 bg-white rounded-lg shadow">
-          <h3 class="font-semibold">${item.title}</h3>
-          <p>by ${item.author}</p>
-          <p>Data: ${item.year}</p>
-          <p><i>${item.eco_critic_description}</i></p>
+          <h3 class="font-semibold">${item.Name}</h3>
+          <p>Data: ${item.Year}</p>
         </div>
       `)
       .join('');

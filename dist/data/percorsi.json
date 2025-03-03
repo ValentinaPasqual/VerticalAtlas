@@ -1,0 +1,20 @@
+[
+    {
+        "id": "percorso1",
+        "titolo": "Percorso critico sulla mitologia greca",
+        "descrizione": "Analisi dei miti greci con riferimento ai documenti storici.",
+        "punti": [
+            { "lat": 41.9028, "lng": 12.4964, "descrizione": "Roma, Museo Nazionale Romano" },
+            { "lat": 37.9838, "lng": 23.7275, "descrizione": "Atene, Museo dell'Acropoli" }
+        ]
+    },
+    {
+        "id": "percorso2",
+        "titolo": "Percorso sulla pittura fiamminga",
+        "descrizione": "Esplorazione delle tecniche pittoriche nei musei europei.",
+        "punti": [
+            { "lat": 51.2194, "lng": 4.4025, "descrizione": "Anversa, Museo Reale delle Belle Arti" },
+            { "lat": 50.8503, "lng": 4.3517, "descrizione": "Bruxelles, Museo Magritte" }
+        ]
+    }
+]

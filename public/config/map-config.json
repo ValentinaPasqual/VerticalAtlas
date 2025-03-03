@@ -5,58 +5,59 @@
     "tileLayer": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     "attribution": "© OpenStreetMap contributors"
   },
+  "datasetConfig": {
+    "multivalue_rows" : {
+      "Alpinist" : ",",
+      "Guide": ",",
+      "Expedition_members": ","
+    }
+  },
   "searchConfig": {
     "debounceTime": 300,
     "defaultSort": "date_desc",
     "sortOptions": [
-      {"value": "date_desc", "label": "Date (Desc)"},
-      {"value": "date_asc", "label": "Date (Asc)"}
+      {"value": "date_desc", "label": "Year (Desc)"},
+      {"value": "date_asc", "label": "Year (Asc)"}
     ]
   },
   "resultsDisplay": {
-    "tagsToShow": ["title", "author", "year"]
+    "tagsToShow": ["Titolo", "author", "year"]
   },
   "sortings": {
     "date_desc": {
-      "field": "Data",
+      "field": "Year",
       "order": "desc"
     },
     "date_asc": {
-      "field": "Data",
+      "field": "Year",
       "order": "asc"
     }
   },
   "aggregations": {
-    "author": {
-      "title": "Autore",
-      "size": 100,
+    "Expedition_members": {
+      "title": "Members",
+      "size": 500,
       "conjunction": false,
       "type": "simple"
     },
-    "publisher": {
-      "title": "Editore",
+    "Year": {
+      "title": "Year",
       "size": 100,
       "conjunction": false,
-      "type": "simple"
+      "type": "range"
     },
-    "year": {
-      "title": "Anno di pubblicazione",
+    "altitude_span": {
+      "title": "Altitude",
       "size": 100,
       "conjunction": false,
-      "type": "chronology"
+      "type": "range"
     },
-    "mainSpace": {
-      "title": "Ambientazione",
+    "SOIUSA": {
+      "title": "SOIUSA",
       "size": 100,
       "conjunction": false,
       "type": "taxonomy"
-    },
-    "landscapeType": {
-      "title": "Tipo di ambientazione",
-      "size": 100,
-      "conjunction": false,
-      "type": "simple"
     }
   },
-  "searchableFields": ["title", "author"]
+  "searchableFields": ["Titolo"]
 }
