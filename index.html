@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASSI - Atlante delle Prime Ascese nelle Alpi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .alpine-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/800');
+            background-size: cover;
+            background-position: center;
+        }
+        .map-container {
+            height: 70vh;
+            min-height: 500px;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+        }
+        .mountain-marker {
+            color: #4F46E5;
+            font-size: 1.5rem;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+    </style>
+  <script type="module" crossorigin src="/VerticalAtlas/assets/js/main.js"></script>
+  <link rel="modulepreload" crossorigin href="/VerticalAtlas/assets/js/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/VerticalAtlas/assets/js/initMap-D-kx2PzE.js">
+  <link rel="modulepreload" crossorigin href="/VerticalAtlas/assets/js/dataParser-BaaGjuH2.js">
+  <link rel="stylesheet" crossorigin href="/VerticalAtlas/assets/css/initMap.css">
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+    <!-- Header semplificato -->
+    <header class="bg-indigo-800 text-white shadow-lg">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-mountain text-2xl"></i>
+                        <span class="text-3xl font-bold tracking-tight">SASSI</span>
+                    </div>
+                    <div class="hidden md:flex ml-10 space-x-8 items-center">
+                        <a href="#" class="text-white hover:text-indigo-200 font-medium transition">Home</a>
+                        <a href="#" class="text-white hover:text-indigo-200 font-medium transition">Atlante</a>
+                        <!-- <a href="#" class="text-white hover:text-indigo-200 font-medium transition">Pionieri</a>
+                        <a href="#" class="text-white hover:text-indigo-200 font-medium transition">Cronologia</a> -->
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="text-white hover:text-indigo-200 font-medium transition">Contatti</a>
+                    <a href="#" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-md font-medium transition">Documentazione</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mappa in risalto -->
+    <!-- Layout principale con grid a due colonne -->
+<!-- Mappa in risalto -->
+<div class="container mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Mappa (occupa 2/3 su desktop) -->
+    <div class="lg:col-span-2">
+        <div class="relative w-full bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-2xl overflow-hidden group">
+            <!-- Overlay scuro con effetto hover -->
+            <div class="absolute inset-0 bg-indigo-900 bg-opacity-20 backdrop-filter backdrop-blur-sm z-10"></div>
+            
+            <!-- Mappa -->
+            <div id="map" class="w-full h-[600px] md:h-[700px] relative z-0"></div>
+            
+            <!-- Badge superiore con effetto glassmorphism -->
+            <div class="absolute top-6 left-6 bg-white bg-opacity-80 backdrop-filter backdrop-blur-md p-4 rounded-lg shadow-lg border-l-4 border-indigo-600 z-20 transform transition-all duration-300 hover:scale-105">
+                <h2 class="text-xl font-bold text-indigo-800" data-content="project-title">QUESTO TESTO SARÀ SOSTITUITO</h2>
+                <p class="text-sm text-indigo-600 mt-1" data-content="project-subtitle">QUESTO SOTTOTITOLO SARÀ SOSTITUITO</p>
+            </div>
+            
+            <!-- Overlay informativo inferiore -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-indigo-900 to-transparent text-white p-6 z-20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out">
+                <h3 class="text-xl font-bold mb-2" data-content="map-info-title">QUESTO TITOLO SARÀ SOSTITUITO</h3>
+                <p class="text-sm opacity-90" data-content="map-info-description">QUESTA DESCRIZIONE SARÀ SOSTITUITA</p>
+            </div>
+            
+            <!-- Indicatore di interattività -->
+            <div class="absolute bottom-4 right-4 bg-white bg-opacity-90 p-2 rounded-full shadow-lg pulse-animation z-20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                </svg>
+            </div>
+            
+            <!-- Pattern decorativo -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500 bg-opacity-20 rounded-bl-full z-10"></div>
+        </div>
+    </div>
+    
+    <!-- Colonna laterale con pulsanti e descrizione (occupa 1/3 su desktop) -->
+    <div class="flex flex-col space-y-6">
+        <!-- Descrizione del progetto con effetti visivi -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-indigo-700 relative overflow-hidden">
+            <!-- Pattern decorativo -->
+            <div class="absolute -right-12 -top-12 w-32 h-32 bg-indigo-100 rounded-full opacity-70"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-4 flex items-center">
+                    <span class="bg-indigo-600 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    Il Progetto
+                </h2>
+                <p class="text-gray-700 mb-4 leading-relaxed" data-content="project-description-1">
+                    PLACEHOLDER PRIMO PARAGRAFO DESCRIZIONE
+                </p>
+                <p class="text-gray-700 leading-relaxed" data-content="project-description-2">
+                    PLACEHOLDER SECONDO PARAGRAFO DESCRIZIONE
+                </p>
+                
+                <!-- Statistiche in pillole -->
+                <div class="mt-6 grid grid-cols-2 gap-4">
+                    <div class="bg-indigo-50 p-3 rounded-lg text-center">
+                        <span class="block text-2xl font-bold text-indigo-800">500+</span>
+                        <span class="text-xs text-indigo-600">Ascese storiche</span>
+                    </div>
+                    <div class="bg-indigo-50 p-3 rounded-lg text-center">
+                        <span class="block text-2xl font-bold text-indigo-800">1786</span>
+                        <span class="text-xs text-indigo-600">Prima salita del Monte Bianco</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pulsanti con effetti avanzati -->
+        <div class="flex flex-col space-y-4">
+            <a href="#" class="group relative flex items-center justify-center bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg overflow-hidden transition duration-300 ease-in-out hover:shadow-indigo-200 hover:shadow-xl">
+                <!-- Sfondo animato -->
+                <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <!-- Icona e testo -->
+                <span class="relative z-10 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 transform group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-lg">Scopri di più</span>
+                </span>
+                
+                <!-- Freccia indicatrice -->
+                <span class="absolute right-4 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </span>
+            </a>
+            
+            <a href="./pages/mappa.html" class="group relative flex items-center justify-center bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg overflow-hidden transition duration-300 ease-in-out hover:shadow-indigo-200 hover:shadow-xl">
+                <!-- Sfondo animato -->
+                <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <!-- Icona e testo -->
+                <span class="relative z-10 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 transform group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    <span class="text-lg">Vai alla mappa interattiva</span>
+                </span>
+                
+                <!-- Freccia indicatrice -->
+                <span class="absolute right-4 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </span>
+            </a>
+        </div>
+        
+        <!-- Badge o info aggiuntive con design migliorato -->
+        <div class="bg-gradient-to-r from-indigo-50 to-blue-50 p-5 rounded-xl border border-indigo-200 relative overflow-hidden">
+            <!-- Icona decorativa di sfondo -->
+            <div class="absolute -right-5 -bottom-5 opacity-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-indigo-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            
+            <div class="relative z-10">
+                <div class="flex items-center text-sm text-indigo-800 font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Ultimo aggiornamento: Marzo 2025
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Sezione "Evidenze dalla mappa" -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div id="featured-locations-container"></div>
+    </div>
+
+    <!-- Sezione "Percorsi narrativi" -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div id="storytelling-paths-container"></div>
+    </div>
+</div>
+
+
+    <!-- Sezione pionieri (versione compatta) -->
+    <!-- <div class="bg-gray-50 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">I Pionieri dell'Alpinismo</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="inline-block rounded-full overflow-hidden h-24 w-24 mb-4 mx-auto bg-gray-200">
+                        <img src="/api/placeholder/240/240" alt="Jacques Balmat" class="h-full w-full object-cover">
+                    </div>
+                    <h3 class="font-bold">Jacques Balmat</h3>
+                    <p class="text-sm text-gray-600">Monte Bianco (1786)</p>
+                </div>
+                <div class="text-center">
+                    <div class="inline-block rounded-full overflow-hidden h-24 w-24 mb-4 mx-auto bg-gray-200">
+                        <img src="/api/placeholder/240/240" alt="Edward Whymper" class="h-full w-full object-cover">
+                    </div>
+                    <h3 class="font-bold">Edward Whymper</h3>
+                    <p class="text-sm text-gray-600">Cervino (1865)</p>
+                </div>
+                <div class="text-center">
+                    <div class="inline-block rounded-full overflow-hidden h-24 w-24 mb-4 mx-auto bg-gray-200">
+                        <img src="/api/placeholder/240/240" alt="Lucy Walker" class="h-full w-full object-cover">
+                    </div>
+                    <h3 class="font-bold">Lucy Walker</h3>
+                    <p class="text-sm text-gray-600">Cervino (1871)</p>
+                </div>
+                <div class="text-center">
+                    <div class="inline-block rounded-full overflow-hidden h-24 w-24 mb-4 mx-auto bg-gray-200">
+                        <img src="/api/placeholder/240/240" alt="Walter Bonatti" class="h-full w-full object-cover">
+                    </div>
+                    <h3 class="font-bold">Walter Bonatti</h3>
+                    <p class="text-sm text-gray-600">Vie in solitaria</p>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <a href="./pages/indice.html" class="inline-flex items-center text-indigo-600 font-medium hover:text-indigo-800 transition">
+                    Scopri tutti i pionieri
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Call to action -->
+    <div class="bg-indigo-700 text-white py-12">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-4">Partecipa al Progetto SASSI</h2>
+            <p class="text-xl mb-6 max-w-3xl mx-auto">Aiutaci a documentare la storia dell'alpinismo. Hai informazioni, fotografie o documenti storici? Contribuisci al nostro atlante digitale.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="#" class="bg-white text-indigo-700 hover:bg-gray-100 px-6 py-3 rounded-md font-medium transition">Contribuisci</a>
+                <a href="#" class="bg-indigo-800 hover:bg-indigo-900 text-white px-6 py-3 rounded-md font-medium transition">Contattaci</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white pt-12 pb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">SASSI</h3>
+                    <p class="text-gray-400">Storia dell'Alpinismo: Scalate Storiche in Italia. L'Enciclopedia Digitale dell'Alpinismo: un progetto dedicato alla conservazione della storia delle prime ascese nelle Alpi.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Esplora</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Atlante</a></li>
+                        <li><a href="#" class="hover:text-white transition">Indice cronologico</a></li>
+                        <li><a href="#" class="hover:text-white transition">Pionieri</a></li>
+                        <li><a href="#" class="hover:text-white transition">Documenti storici</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Risorse</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Biblioteca digitale</a></li>
+                        <li><a href="#" class="hover:text-white transition">Archivio fotografico</a></li>
+                        <li><a href="#" class="hover:text-white transition">Mappe storiche</a></li>
+                        <li><a href="#" class="hover:text-white transition">Pubblicazioni</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contatti</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-center"><i class="fas fa-envelope mr-2"></i> info@leda-alpine.org</li>
+                        <li class="flex items-center"><i class="fas fa-phone mr-2"></i> +39 0123 456789</li>
+                        <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i> Via delle Alpi, 1 - Torino</li>
+                    </ul>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-6">
+                <p class="text-center text-gray-500">&copy; 2025 SASSI - L'Enciclopedia Digitale dell'Alpinismo. Tutti i diritti riservati.</p>
+            </div>
+        </div>
+    </footer>
+
+    
+</body>
+</html>

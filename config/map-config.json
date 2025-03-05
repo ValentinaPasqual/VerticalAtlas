@@ -1,0 +1,71 @@
+{
+  "project" : {
+    "projectName": "SASSI",
+    "projectTitle": "Storia dell'Alpinismo: Scalate Storiche in Italia",
+    "projectSubtitle":"Esplora la storia dell'alpinismo",
+    "projectDescription":"Esplora le prime ascese storiche che hanno segnato lo sviluppo dell'alpinismo. Questa mappa interattiva ti permette di scoprire i luoghi e le storie che hanno fatto la storia dell'arrampicata. <br><br> Ogni punto sulla mappa rappresenta un'ascesa storica con informazioni dettagliate su data, alpinisti e aneddoti storici.",
+    "mapInfoTitle": "Scopri le prime ascese",
+    "mapInfoDescription": "Questa mappa interattiva ti permette di esplorare i luoghi che hanno fatto la storia dell'alpinismo. Clicca sui marker per visualizzare informazioni dettagliate."
+},
+  "map": {
+    "initialView": [46.5, 9.8],
+    "initialZoom": 7,
+    "tileLayer": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "attribution": "© OpenStreetMap contributors"
+  },
+  "datasetConfig": {
+    "multivalue_rows" : {
+      "Alpinist" : ",",
+      "Guide": ",",
+      "Expedition_members": ","
+    }
+  },
+  "searchConfig": {
+    "debounceTime": 300,
+    "defaultSort": "date_desc",
+    "sortOptions": [
+      {"value": "date_desc", "label": "Year (Desc)"},
+      {"value": "date_asc", "label": "Year (Asc)"}
+    ]
+  },
+  "resultsDisplay": {
+    "tagsToShow": ["Titolo", "author", "year"]
+  },
+  "sortings": {
+    "date_desc": {
+      "field": "Year",
+      "order": "desc"
+    },
+    "date_asc": {
+      "field": "Year",
+      "order": "asc"
+    }
+  },
+  "aggregations": {
+    "Expedition_members": {
+      "title": "Members",
+      "size": 500,
+      "conjunction": false,
+      "type": "simple"
+    },
+    "Year": {
+      "title": "Year",
+      "size": 100,
+      "conjunction": false,
+      "type": "range"
+    },
+    "altitude_span": {
+      "title": "Altitude",
+      "size": 100,
+      "conjunction": false,
+      "type": "range"
+    },
+    "SOIUSA": {
+      "title": "SOIUSA",
+      "size": 100,
+      "conjunction": false,
+      "type": "taxonomy"
+    }
+  },
+  "searchableFields": ["Titolo"]
+}
